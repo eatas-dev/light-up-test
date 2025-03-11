@@ -1,0 +1,35 @@
+name: Python Static Analysis
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.py'
+
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.py'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+    check-static-analysis:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v5
+          with:
+                python-version: 3.12
+                cache: 'pip'
+        - name: Install dependencies
+          run: |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install -e 'src[dev]'
+            python3 -m pip install -r functions/AddRagData/requirements.txt
+        - name: Check mypy
+          run: |
+            mypy .

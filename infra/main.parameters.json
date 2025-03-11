@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "principalId": {
+      "value": "${AZURE_PRINCIPAL_ID}"
+    },
+    "mongoAdminPassword": {
+      "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} mongoAdminPassword)"
+    },
+    "appServiceSku": {
+      "value": "${AZURE_APP_SERVICE_SKU=B1}"
+    },
+    "mongoServiceSku":{
+      "value": "${AZURE_MONGO_SERVICE_SKU=M40}"
+    },
+    "vnetIntegration":{
+      "value": false
+    },
+    "platformSubscriptionId": {
+      "value": ""
+    },
+    "lawRgName": {
+      "value": "rg-common-law"
+    },
+    "lawName": {
+      "value": "law-common"
+    },
+    "healthCheckPath": {
+      "value": "/hello"
+    },
+    "alertEmails": {
+      "value": [
+        {
+          "emailAddress": "test.user@testcompany.com",
+          "name": "TestUser-EmailAction",
+          "useCommonAlertSchema": "true"
+        }
+      ]
+    }
+  }
+}
