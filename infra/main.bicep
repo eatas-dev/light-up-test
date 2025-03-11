@@ -88,7 +88,7 @@ module keyVault './core/security/keyvault.bicep' = {
   name: 'keyvault'
   scope: resourceGroup
   params: {
-    name: 'kv-${take(replace(prefix, '-', ''), 17)}'
+    name: 'key-${take(replace(prefix, '-', ''), 17)}'
     location: location
     tags: tags
     principalId: principalId
@@ -219,8 +219,8 @@ module web 'core/host/appservice.bicep' = {
     applicationInsightsName: !empty(platformSubscriptionId) ? monitoringResource.outputs.applicationInsightsName : ''
     logAnalyticsWorkspaceId: !empty(platformSubscriptionId) ? monitoringResource.outputs.logAnalyticsWorkspaceId : ''
     actionGroupId: !empty(platformSubscriptionId) ? monitoringResource.outputs.actionGroupId : ''
-    mongoClusterName: mongoClusterName
-    openAIDeploymentName: openAIDeploymentName
+    mongoClusterName: ''
+    openAIDeploymentName: ''
     appSettings: {
       AZURE_OPENAI_DEPLOYMENT_NAME: openAIDeploymentName
       AZURE_OPENAI_ENDPOINT: openAi.outputs.endpoint

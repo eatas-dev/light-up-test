@@ -21,10 +21,10 @@
       "value": "${AZURE_MONGO_SERVICE_SKU=M40}"
     },
     "vnetIntegration":{
-      "value": false
+      "value": true
     },
     "platformSubscriptionId": {
-      "value": ""
+      "value": "255e18f8-6073-4c40-b7e2-41bb0b0d533e"
     },
     "lawRgName": {
       "value": "rg-common-law"
