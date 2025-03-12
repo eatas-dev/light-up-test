@@ -233,3 +233,6 @@ wsproto==1.2.0
     # via hypercorn
 yarl==1.18.3
     # via aiohttp
+
+youtube-transcript-api
+pytube

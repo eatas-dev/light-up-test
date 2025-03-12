@@ -88,7 +88,7 @@ module keyVault './core/security/keyvault.bicep' = {
   name: 'keyvault'
   scope: resourceGroup
   params: {
-    name: 'kv-${take(replace(prefix, '-', ''), 17)}'
+    name: 'key-${take(replace(prefix, '-', ''), 17)}'
     location: location
     tags: tags
     principalId: principalId
@@ -109,6 +109,18 @@ var openAiDeployments = [
     sku: {
       name: 'Standard'
       capacity: chatGptDeploymentCapacity
+    }
+  }
+  {
+    name: 'gpt-4o'
+    model: {
+      format: 'OpenAI'
+      name: 'gpt-4o'
+      version: '2024-11-20'
+    }
+    sku: {
+      name: 'Standard'
+      capacity: 8
     }
   }
   {
@@ -219,8 +231,8 @@ module web 'core/host/appservice.bicep' = {
     applicationInsightsName: !empty(platformSubscriptionId) ? monitoringResource.outputs.applicationInsightsName : ''
     logAnalyticsWorkspaceId: !empty(platformSubscriptionId) ? monitoringResource.outputs.logAnalyticsWorkspaceId : ''
     actionGroupId: !empty(platformSubscriptionId) ? monitoringResource.outputs.actionGroupId : ''
-    mongoClusterName: mongoClusterName
-    openAIDeploymentName: openAIDeploymentName
+    mongoClusterName: ''
+    openAIDeploymentName: ''
     appSettings: {
       AZURE_OPENAI_DEPLOYMENT_NAME: openAIDeploymentName
       AZURE_OPENAI_ENDPOINT: openAi.outputs.endpoint
@@ -228,6 +240,8 @@ module web 'core/host/appservice.bicep' = {
       AZURE_OPENAI_CHAT_DEPLOYMENT_NAME: chatGptDeploymentName
       AZURE_OPENAI_EMBEDDINGS_MODEL_NAME: embeddingModelName
       AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME: embeddingDeploymentName
+      AZURE_OPENAI_GPT4_MODEL_NAME: 'gpt-4o'
+      AZURE_OPENAI_GPT4_DEPLOYMENT_NAME: 'gpt-4o'
       AZURE_OPENAI_API_KEY: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=cognitiveServiceKey)'
       AZURE_COSMOS_PASSWORD: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=mongoAdminPassword)'
       AZURE_COSMOS_CONNECTION_STRING: mongoCluster.outputs.connectionStringKey
