@@ -2,7 +2,7 @@ import json
 import os
 from typing import Any
 
-from langchain_community.document_loaders import YoutubeLoader
+# from langchain_community.document_loaders import YoutubeLoader
 from langchain_community.vectorstores import AzureCosmosDBVectorSearch
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
@@ -43,53 +43,112 @@ class YouTubeSummarizer(ApproachesBase):
                 azure_endpoint=self.azure_openai_endpoint,
                 azure_deployment=self.azure_openai_deployment_name,
                 openai_api_version=os.environ.get("OPENAI_API_VERSION", "2023-09-15-preview"),
-                temperature=0.5,
+                temperature=0.7,
             )
         )
 
     async def load_and_summarize_video(self, youtube_url: str) -> dict[str, Any]:
         """YouTubeの動画を読み込んで整理する"""
         try:
-            # YouTubeの動画を読み込む
-            loader = YoutubeLoader.from_youtube_url(
-                youtube_url,
-                # add_video_info=True,
-                language=["ja"],
-            )
+            # youtubeから文字起こしを取得したかったが、以下の制限により、デプロイ環境ではBlokされるため、
+            # 今回はテキストから推論するように。
+            # https://github.com/jdepoix/youtube-transcript-api
+            # loader = YoutubeLoader.from_youtube_url(
+            #     youtube_url,
+            #     # add_video_info=True,
+            #     language=["ja"])
 
-            # ドキュメントを読み込む
-            documents = loader.load()
-
-            if not documents:
-                print(documents)
-                return {"error": f"{youtube_url}を読み込めませんでした。字幕が利用できない可能性があります。"}
-
-            summary_prompt_template = """
-            以下のYouTube動画の書き起こしをユーザーと管理栄養士に分類した会話に整理してください:
-            {text}
-            """
+            # # ドキュメントを読み込む
+            # documents = loader.load()
+            documents = youtube_url
 
             evaluation_prompt_template = """
-            以下のユーザーと管理栄養士の会話を評価してください:
+            あなたは管理栄養士と食習慣改善を目指すユーザー間の会話を分析する専門アシスタントです。会話の内容を分析し、以下の形式でアウトプットを生成してください。
+
+            管理栄養士と食習慣を改善したいユーザーとの会話です。
+            2者の会話を分けたうえで、面談のポイントをまとめてください。
+            また以下の観点で管理栄養士が面談を進行できているかを評価してください。アウトプットは各項目に対してはtrue,
+            falseで返してください。
+            会話を全て記載する必要はなく、該当する文章のみあわせて記載してください。
+            管理栄養士とユーザーの会話の比率を計算してください。
+
+            ###項目
+            - フィードバック:事実を客観的にとらえ、ユーザーに事実を伝えている
+            - メタコミュニケーション:現在交わしているコミュニケーションが効果的かどうかを確認することです。
+            コーチングを効果的に進めるために、コーチとクライアントが距離をもって会話を振り返り、お互いに利益を生み出しているかどうかを確認します。
+            【メタコミュニケーションの場面】
+            * 会話が堂々巡りになっていると感じたとき
+            * 会話にズレを感じたとき
+            * 具体的な行動を決めたとき
+            【メタコミュニケーションの確認内容】
+            * コーチの思い込みでコーチングが行われていないかどうか
+            * コーチングの振り返りを行い、順調にコーチングができているかどうかの確認
+            * コーチングが機能しているか
+            【メタコミュニケーションの例】
+            * 「ここまで話してどうですか？」
+            - 目標設定:具体的な行動目標の設定ができているか、その行動目標に対してユーザーの了承を得ているか
+            - ビジュアライズ:達成を見えるようにすること。①〜⑤のどの種類のビジュアライズができているかも評価してください
+            ①フューチャー・ペーシング
+            ②モデルになる人に置き換える（モデリング）
+            ③ディソシエート / アソシエート
+            ④リソース:うまくいくイメージのもとになる資源・材料のこと。
+            過去にうまくいった経験が役に立つこと。過去のダイエット経験、良い行動をした際の体験
+            ⑤間接法
+            - 具体的な提案:何をどしたらよいか理由とともに、どのシーン、どのタイミングでどんな行動をしたらよいか。
+            ユーザーが実行したいと思う提案ができているか。
+            - アクノレッジメント:相手の変化や成果に気づき、それを言語化してはっきり伝えること。
+            単にほめることではない。承認する、相手の存在を認める、相手に感謝する、信頼してまかせること。
+            -傾聴を妨げる要因（ブロッキング）がない:勝手な推測、先入観、思い込み、興味関心、同一視、評価・批判、競争意識
+            -ユーザーの返答を受容しているか
+            -ユーザーの気持ちを汲み取っているか
+            -ユーザーの気持ちを無視していないか
+
+            全体を通して良い点とよりよくするための改善点をまとめてください。
+
+            以下を参考に全体を通しての評価を点数化してください。
+            ###点数化項目(コーチングの項目に漏れがないか。)
+            - フィードバック:5回以上10点、3〜4回5点、1〜2回：3点、0回0点
+            - メタコミュニケーション:3回以上10点、2回以上5点、1回3点、0回0点
+            - 目標設定:3個以内10点、5個以上3点
+            - ビジュアライズ:3回以上10点、1〜2回5点、0回0点
+            - 具体的な提案（シーンとタイミングと実行可能な提案）:10点: 抽象的な場合は5点
+            - アクノレッジメント:10点
+            -傾聴を妨げる要因（ブロッキング）がない:10点
+            -ユーザーの実行意欲が湧く提案をしている:10点
+            -専門家として自信のある対応をしている:10点
+            -会話比率は管理栄養士50%未満である:10点
+
+            ###抽出指示
+            各点数化項目について、会話のどの部分が評価に反映されたのか具体的に抜き出して記載してください。例えば：
+
+            - フィードバック（X点）:
+            * 「[管理栄養士の発言をそのまま引用]」
+            * 「[管理栄養士の別の発言を引用]」
+            * （他の該当発言も同様に列挙）
+
+            - メタコミュニケーション（X点）:
+            * 「[該当する発言を引用]」
+            * （他の該当発言も同様に列挙）
+
+            （以下、各点数化項目について同様に記載）
+
+            それぞれの項目について、点数とその根拠となった会話部分を明確に関連付けて記載してください。引用は正確に行い、会話のコンテキストがわかるよう十分な長さを確保してください。
+
+
+            ----
             {text}
             """
 
-            summary_prompt = PromptTemplate.from_template(summary_prompt_template)
             evaluation_prompt = PromptTemplate.from_template(evaluation_prompt_template)
-
-            # チェーン
-            summary = summary_prompt | self.llm | StrOutputParser()
-            content = summary.invoke(documents[0].page_content)
-            print(content)
 
             # 動画のメタデータ
             video_info = {
                 "title": youtube_url,
-                "description": content,
+                "description": "youtube video",
             }
 
             chain = evaluation_prompt | self.llm | StrOutputParser()
-            result = chain.invoke(content)
+            result = chain.invoke(documents)
 
             # 結果を返す
             return {"video_info": video_info, "summary": result, "document_chunks": len(documents)}
@@ -110,16 +169,7 @@ class YouTubeSummarizer(ApproachesBase):
 
         last_message = messages[-1]
         content = last_message.get("content", "")
-
-        # YouTube URLを抽出
-        youtube_url = None
-        for word in content.split():
-            if "youtube.com" in word or "youtu.be" in word:
-                youtube_url = word
-                break
-
-        if not youtube_url:
-            return [], json.dumps({"error": "YouTubeのURLが見つかりませんでした"})
+        youtube_url = content
 
         # 動画を要約
         result = await self.load_and_summarize_video(youtube_url)

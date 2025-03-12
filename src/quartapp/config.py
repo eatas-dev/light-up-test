@@ -180,15 +180,7 @@ class AppConfig(AppConfigBase):
                 last_message = messages[-1]
                 content = last_message.get("content", "")
 
-                # YouTubeのURLが含まれているか確認
-                youtube_url = None
-                for word in content.split():
-                    if "youtube.com" in word or "youtu.be" in word:
-                        youtube_url = word
-                        break
-
-                # YouTubeのURLが見つかった場合、YouTubeSummarizerを使用
-                if youtube_url:
+                if content:
                     from quartapp.approaches.summarizer import YouTubeSummarizer
 
                     summarizer = YouTubeSummarizer()
@@ -214,7 +206,7 @@ class AppConfig(AppConfigBase):
 
                     context = Context(
                         data_points=[
-                            DataPoint(description=result["summary"], category="YouTube", collection=youtube_url)
+                            DataPoint(description=result["summary"], category="YouTube", collection="YouTube")
                         ],
                         thoughts=[
                             Thought(description=messages[-1]["content"], title="User Query"),
