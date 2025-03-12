@@ -20,10 +20,6 @@ anyio==4.8.0
     # via
     #   httpx
     #   openai
-async-timeout==4.0.3
-    # via
-    #   aiohttp
-    #   langchain
 attrs==24.3.0
     # via aiohttp
 blinker==1.9.0
@@ -43,21 +39,20 @@ click==8.1.8
     #   quart
 dataclasses-json==0.6.7
     # via langchain-community
+defusedxml==0.7.1
+    # via youtube-transcript-api
 distro==1.9.0
     # via openai
 dnspython==2.7.0
     # via pymongo
-exceptiongroup==1.2.2
-    # via
-    #   anyio
-    #   hypercorn
-    #   taskgroup
 flask==3.1.0
     # via quart
 frozenlist==1.5.0
     # via
     #   aiohttp
     #   aiosignal
+greenlet==3.1.1
+    # via sqlalchemy
 h11==0.14.0
     # via
     #   httpcore
@@ -170,6 +165,8 @@ python-dotenv==1.0.1
     # via
     #   pydantic-settings
     #   quartapp (src/pyproject.toml)
+pytube==15.0.0
+    # via quartapp (src/pyproject.toml)
 pyyaml==6.0.2
     # via
     #   langchain
@@ -186,6 +183,7 @@ requests==2.32.3
     #   langsmith
     #   requests-toolbelt
     #   tiktoken
+    #   youtube-transcript-api
 requests-toolbelt==1.0.0
     # via langsmith
 sniffio==1.3.1
@@ -196,8 +194,6 @@ sqlalchemy==2.0.36
     # via
     #   langchain
     #   langchain-community
-taskgroup==0.2.2
-    # via hypercorn
 tenacity==8.5.0
     # via
     #   langchain
@@ -205,21 +201,16 @@ tenacity==8.5.0
     #   langchain-core
 tiktoken==0.8.0
     # via langchain-openai
-tomli==2.2.1
-    # via hypercorn
 tqdm==4.67.1
     # via openai
 typing-extensions==4.12.2
     # via
     #   anyio
-    #   hypercorn
     #   langchain-core
-    #   multidict
     #   openai
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
-    #   taskgroup
     #   typing-inspect
 typing-inspect==0.9.0
     # via dataclasses-json
@@ -233,6 +224,5 @@ wsproto==1.2.0
     # via hypercorn
 yarl==1.18.3
     # via aiohttp
-
-youtube-transcript-api
-pytube
+youtube-transcript-api==1.0.0
+    # via quartapp (src/pyproject.toml)

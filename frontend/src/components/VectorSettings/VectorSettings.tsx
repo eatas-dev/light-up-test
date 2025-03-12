@@ -31,7 +31,8 @@ export const VectorSettings = ({ updateRetrievalMode, defaultRetrievalMode }: Pr
                 options={[
                     { key: "rag", text: "RAG with Vector Search", selected: retrievalMode == RetrievalMode.Hybrid, data: RetrievalMode.Hybrid },
                     { key: "vector", text: "Vector Search", selected: retrievalMode == RetrievalMode.Vectors, data: RetrievalMode.Vectors },
-                    { key: "keyword", text: "Keyword Search", selected: retrievalMode == RetrievalMode.Text, data: RetrievalMode.Text }
+                    { key: "keyword", text: "Keyword Search", selected: retrievalMode == RetrievalMode.Text, data: RetrievalMode.Text },
+                    { key: "gpt4o", text: "GPT-4oでの評価", selected: retrievalMode == RetrievalMode.GPT4O, data: RetrievalMode.GPT4O }
                 ]}
                 required
                 onChange={onRetrievalModeChange}
