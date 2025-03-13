@@ -171,7 +171,6 @@ class AppConfig(AppConfigBase):
         self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
     ) -> RetrievalResponse:
 
-        # 新しいセッション状態を生成（既存のものがあればそれを使用）
         new_session_state: str = session_state if session_state else str(uuid4())
 
         try:
@@ -231,11 +230,13 @@ class AppConfig(AppConfigBase):
             client = openai.AsyncAzureOpenAI(
                 api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
                 api_version=os.environ.get("OPENAI_API_VERSION", "2023-09-15-preview"),
-                azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
+                azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT", ""),
             )
 
             response = await client.chat.completions.create(
-                model=os.environ.get("AZURE_OPENAI_GPT4_DEPLOYMENT_NAME"), messages=messages, temperature=temperature
+                model=os.environ.get("AZURE_OPENAI_GPT4_DEPLOYMENT_NAME", "gpt-4o"),
+                messages=messages,
+                temperature=temperature,
             )
 
             answer_content = response.choices[0].message.content
@@ -263,57 +264,3 @@ class AppConfig(AppConfigBase):
                     content=f"申し訳ありません。エラーが発生しました: {error_message}", role=AIChatRoles.ASSISTANT
                 ),
             )
-
-    async def run_gpt4o_stream(
-        self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
-    ) -> AsyncGenerator[RetrievalResponseDelta, None]:
-
-        # 新しいセッション状態を生成
-        new_session_state: str = session_state if session_state else str(uuid4())
-
-        try:
-
-            # OpenAIクライアントを新しく作成
-            client = openai.AsyncAzureOpenAI(
-                api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
-                api_version=os.environ.get("OPENAI_API_VERSION", "2023-09-15-preview"),
-                azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
-            )
-
-            # 空のコンテキストを最初に送信
-            context = Context(
-                data_points=[],
-                thoughts=[
-                    Thought(description=messages[-1]["content"], title="User Query"),
-                    Thought(description="純粋なGPT-4oストリーミング応答", title="GPT-4o Direct Stream"),
-                ],
-            )
-
-            yield RetrievalResponseDelta(context=context, sessionState=new_session_state)
-
-            # ストリーミングレスポンスを作成
-            stream = await client.chat.completions.create(
-                model=os.environ.get("AZURE_OPENAI_GPT4_DEPLOYMENT_NAME"),
-                messages=messages,
-                temperature=temperature,
-                stream=True,
-            )
-
-            message_content = ""
-
-            # ストリーミングレスポンスを処理
-            async for chunk in stream:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    content = chunk.choices[0].delta.content
-                    message_content += content
-                    message = Message(content=content, role=AIChatRoles.ASSISTANT)
-                    yield RetrievalResponseDelta(delta=message)
-
-        except Exception as e:
-            # エラーハンドリング
-            error_message = f"Error in GPT-4o direct stream: {str(e)}"
-            print(f"GPT-4o Streaming Error: {error_message}")
-            error_delta = Message(
-                content=f"申し訳ありません。エラーが発生しました: {error_message}", role=AIChatRoles.ASSISTANT
-            )
-            yield RetrievalResponseDelta(delta=error_delta)

@@ -39,10 +39,10 @@ class YouTubeSummarizer(ApproachesBase):
             chat
             if chat
             else AzureChatOpenAI(
-                openai_api_key=self.azure_openai_key,
+                api_key=self.azure_openai_key,
                 azure_endpoint=self.azure_openai_endpoint,
                 azure_deployment=self.azure_openai_deployment_name,
-                openai_api_version=os.environ.get("OPENAI_API_VERSION", "2023-09-15-preview"),
+                model_version=os.environ.get("OPENAI_API_VERSION", "2023-09-15-preview"),
                 temperature=0.7,
             )
         )
@@ -148,9 +148,7 @@ class YouTubeSummarizer(ApproachesBase):
             }
 
             chain = evaluation_prompt | self.llm | StrOutputParser()
-            result = chain.invoke(documents)
-
-            # 結果を返す
+            result = chain.invoke({"text": documents})
             return {"video_info": video_info, "summary": result, "document_chunks": len(documents)}
 
         except Exception as e:
@@ -163,7 +161,7 @@ class YouTubeSummarizer(ApproachesBase):
 
         最後のメッセージからYouTube URLを抽出して要約と評価を行う
         """
-        # 最後のメッセージからYouTube URLを抽出
+        # 最後のメッセージからYouTube URLを抽出 (最後のメッセージを使うことに急遽変更)
         if not messages or len(messages) == 0:
             return [], json.dumps({"error": "メッセージが空です"})
 
