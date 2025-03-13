@@ -8,6 +8,7 @@ from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+from pydantic import SecretStr
 from pymongo.collection import Collection
 
 from quartapp.approaches.base import ApproachesBase
@@ -39,7 +40,7 @@ class YouTubeSummarizer(ApproachesBase):
             chat
             if chat
             else AzureChatOpenAI(
-                api_key=self.azure_openai_key,
+                api_key=SecretStr(self.azure_openai_key) if self.azure_openai_key else None,
                 azure_endpoint=self.azure_openai_endpoint,
                 azure_deployment=self.azure_openai_deployment_name,
                 model_version=os.environ.get("OPENAI_API_VERSION", "2023-09-15-preview"),

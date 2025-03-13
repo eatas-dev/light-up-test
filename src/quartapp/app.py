@@ -140,17 +140,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Quart:
             response = await make_response(format_as_ndjson(result))
             response.mimetype = "application/x-ndjson"
             return response
-        elif retrieval_mode == "gpt4o":  # 新しいモードを追加
-            result = app_config.run_gpt4o_stream(
-                session_state=session_state,
-                messages=messages,
-                temperature=temperature,
-                limit=top,
-                score_threshold=score_threshold,
-            )
-            response = await make_response(format_as_ndjson(result))
-            response.mimetype = "application/x-ndjson"
-            return response
+
         return jsonify({"error": "Not Implemented!"}), 501
 
     return app
