@@ -1,10 +1,11 @@
+# from quart import make_response
 import logging
 from collections.abc import AsyncGenerator
 from json import dumps
 from pathlib import Path
 from typing import Any
 
-from quart import Quart, Response, jsonify, make_response, request, send_file, send_from_directory
+from quart import Quart, Response, jsonify, request, send_file, send_from_directory
 
 from quartapp.approaches.schemas import RetrievalResponse, RetrievalResponseDelta
 from quartapp.config import AppConfig
@@ -38,9 +39,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Quart:
         app.config.from_mapping(test_config)
 
     available_approaches = {
-        "vector": app_config.run_vector,
-        "rag": app_config.run_rag,
-        "keyword": app_config.run_keyword,
+        # "vector": app_config.run_vector,
+        # "rag": app_config.run_rag,
+        # "keyword": app_config.run_keyword,
         "gpt4o": app_config.run_gpt4o,
     }
 
@@ -101,47 +102,47 @@ def create_app(test_config: dict[str, Any] | None = None) -> Quart:
             return jsonify(response)
         return jsonify({"error": "Not Implemented!"}), 501
 
-    @app.route("/chat/stream", methods=["POST"])
-    async def stream_chat() -> Any:
-        if not request.is_json:
-            return jsonify({"error": "request must be json"}), 415
+    # @app.route("/chat/stream", methods=["POST"])
+    # async def stream_chat() -> Any:
+    #     if not request.is_json:
+    #         return jsonify({"error": "request must be json"}), 415
 
-        # Get the request body
-        body = await request.get_json()
+    #     # Get the request body
+    #     body = await request.get_json()
 
-        if not body:
-            return jsonify({"error": "request body is empty"}), 400
+    #     if not body:
+    #         return jsonify({"error": "request body is empty"}), 400
 
-        # Get the request message
-        messages: list = body.get("messages", [])
+    #     # Get the request message
+    #     messages: list = body.get("messages", [])
 
-        if not messages and len(messages) == 0:
-            return jsonify({"error": "request must have a message"}), 400
+    #     if not messages and len(messages) == 0:
+    #         return jsonify({"error": "request must have a message"}), 400
 
-        # Get the request session_state, context from the request body
-        session_state = body.get("session_state", None)
-        context = body.get("context", {})
+    #     # Get the request session_state, context from the request body
+    #     session_state = body.get("session_state", None)
+    #     context = body.get("context", {})
 
-        # Get the overrides from the context
-        override = context.get("overrides", {})
-        retrieval_mode: str = override.get("retrieval_mode", "vector")
-        temperature: float = override.get("temperature", 0.3)
-        top: int = override.get("top", 3)
-        score_threshold: float = override.get("score_threshold", 0.5)
+    #     # Get the overrides from the context
+    #     override = context.get("overrides", {})
+    #     retrieval_mode: str = override.get("retrieval_mode", "vector")
+    #     temperature: float = override.get("temperature", 0.3)
+    #     top: int = override.get("top", 3)
+    #     score_threshold: float = override.get("score_threshold", 0.5)
 
-        if retrieval_mode == "rag":
-            result: AsyncGenerator[RetrievalResponseDelta, None] = app_config.run_rag_stream(
-                session_state=session_state,
-                messages=messages,
-                temperature=temperature,
-                limit=top,
-                score_threshold=score_threshold,
-            )
-            response = await make_response(format_as_ndjson(result))
-            response.mimetype = "application/x-ndjson"
-            return response
+    #     if retrieval_mode == "rag":
+    #         result: AsyncGenerator[RetrievalResponseDelta, None] = app_config.run_rag_stream(
+    #             session_state=session_state,
+    #             messages=messages,
+    #             temperature=temperature,
+    #             limit=top,
+    #             score_threshold=score_threshold,
+    #         )
+    #         response = await make_response(format_as_ndjson(result))
+    #         response.mimetype = "application/x-ndjson"
+    #         return response
 
-        return jsonify({"error": "Not Implemented!"}), 501
+    #     return jsonify({"error": "Not Implemented!"}), 501
 
     return app
 

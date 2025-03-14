@@ -1,7 +1,9 @@
+# from datetime import datetime, timezone
+# from abc import abstractmethod
+# from quartapp.approaches.schemas import RetrievalResponse
 import json
 import os
-from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from abc import ABC
 from urllib.parse import quote_plus
 
 from langchain_core.documents import Document
@@ -13,7 +15,7 @@ from pymongo.errors import (
     OperationFailure,
 )
 
-from quartapp.approaches.schemas import Context, DataPoint, RetrievalResponse, Thought
+from quartapp.approaches.schemas import Context, DataPoint, Thought
 from quartapp.approaches.setup import Setup
 
 
@@ -63,14 +65,14 @@ class AppConfigBase(ABC):
                 if len(old_messages) == 0 or len(new_message) == 0 or len(new_session_state) == 0:
                     raise IndexError
                 old_messages.append(new_message)
-                self.setup._database_setup._users_collection.insert_one(
-                    {
-                        "_id": new_session_state,
-                        "messages": old_messages,
-                        "created_at": datetime.now(timezone.utc),  # noqa: UP017
-                        "updated_at": datetime.now(timezone.utc),  # noqa: UP017
-                    }
-                )
+                # self.setup._database_setup._users_collection.insert_one(
+                #     {
+                #         "_id": new_session_state,
+                #         "messages": old_messages,
+                #         "created_at": datetime.now(timezone.utc),  # noqa: UP017
+                #         "updated_at": datetime.now(timezone.utc),  # noqa: UP017
+                #     }
+                # )
                 return True
             except (AttributeError, ConfigurationError, InvalidName, InvalidOperation, OperationFailure, IndexError):
                 return False
@@ -78,14 +80,14 @@ class AppConfigBase(ABC):
             try:
                 if len(old_messages) == 0 or len(new_message) == 0 or len(new_session_state) == 0:
                     raise IndexError
-                self.setup._database_setup._users_collection.update_one(
-                    {"_id": new_session_state},
-                    {"$push": {"messages": {"$each": [old_messages[-1], new_message]}}},  # noqa: UP017
-                )
-                self.setup._database_setup._users_collection.update_one(
-                    {"_id": new_session_state},
-                    {"$set": {"updated_at": datetime.now(timezone.utc)}},  # noqa: UP017
-                )
+                # self.setup._database_setup._users_collection.update_one(
+                #     {"_id": new_session_state},
+                #     {"$push": {"messages": {"$each": [old_messages[-1], new_message]}}},  # noqa: UP017
+                # )
+                # self.setup._database_setup._users_collection.update_one(
+                #     {"_id": new_session_state},
+                #     {"$set": {"updated_at": datetime.now(timezone.utc)}},  # noqa: UP017
+                # )
                 return True
             except (AttributeError, ConfigurationError, InvalidName, InvalidOperation, OperationFailure, IndexError):
                 return False
@@ -105,7 +107,7 @@ class AppConfigBase(ABC):
             json_data_point.description = raw_data.get("description")
             json_data_point.price = raw_data.get("price")
             json_data_point.category = raw_data.get("category")
-            json_data_point.collection = self.setup._database_setup._collection_name
+            # json_data_point.collection = self.setup._database_setup._collection_name
             data_points.append(json_data_point)
         return data_points
 
@@ -114,17 +116,17 @@ class AppConfigBase(ABC):
         thoughts = self._get_thoughts(documents)
         return Context(data_points=data_points, thoughts=thoughts)
 
-    @abstractmethod
-    async def run_vector(
-        self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
-    ) -> RetrievalResponse: ...
+    # @abstractmethod
+    # async def run_vector(
+    #     self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
+    # ) -> RetrievalResponse: ...
 
-    @abstractmethod
-    async def run_rag(
-        self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
-    ) -> RetrievalResponse: ...
+    # @abstractmethod
+    # async def run_rag(
+    #     self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
+    # ) -> RetrievalResponse: ...
 
-    @abstractmethod
-    async def run_keyword(
-        self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
-    ) -> RetrievalResponse: ...
+    # @abstractmethod
+    # async def run_keyword(
+    #     self, session_state: str | None, messages: list, temperature: float, limit: int, score_threshold: float
+    # ) -> RetrievalResponse: ...
