@@ -20,14 +20,14 @@ param vnetIntegration bool = false
 @description('webApp HealthCeck Path')
 param healthCheckPath string = ''
 
-var mongoClusterName = 'cosmon-${uniqueString(resourceGroup.id)}'
+// var mongoClusterName = 'cosmon-${uniqueString(resourceGroup.id)}'
 var mongoAdminUser = 'admin${uniqueString(resourceGroup.id)}'
-@secure()
-@description('Mongo Server administrator password')
-param mongoAdminPassword string
+// @secure()
+// @description('Mongo Server administrator password')
+// param mongoAdminPassword string
 
-@description('SKU to use for Cosmos DB for MongoDB vCore Plan')
-param mongoServiceSku string
+// @description('SKU to use for Cosmos DB for MongoDB vCore Plan')
+// param mongoServiceSku string
 
 param openAIDeploymentName string = 'oai-${name}'
 param chatGptDeploymentName string = 'chat-gpt'
@@ -180,35 +180,35 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
-module mongoCluster 'core/database/cosmos/mongo/cosmos-mongo-cluster.bicep' = {
-  name: 'mongoCluster'
-  scope: resourceGroup
-  params: {
-    name: mongoClusterName
-    location: location
-    tags: tags
-    administratorLogin: mongoAdminUser
-    administratorLoginPassword: mongoAdminPassword
-    storage: 32
-    nodeCount: 1
-    sku: mongoServiceSku
-    allowAzureIPsFirewall: true
-    logAnalyticsWorkspaceId: !empty(platformSubscriptionId) ? monitoringResource.outputs.logAnalyticsWorkspaceId : ''
-    vnetId: vnetIntegration ? vnet.outputs.vnetId : ''
-    subnetId: vnetIntegration ? vnet.outputs.pepSubnetId : ''
-  }
-}
+// module mongoCluster 'core/database/cosmos/mongo/cosmos-mongo-cluster.bicep' = {
+//   name: 'mongoCluster'
+//   scope: resourceGroup
+//   params: {
+//     name: mongoClusterName
+//     location: location
+//     tags: tags
+//     administratorLogin: mongoAdminUser
+//     administratorLoginPassword: mongoAdminPassword
+//     storage: 32
+//     nodeCount: 1
+//     sku: mongoServiceSku
+//     allowAzureIPsFirewall: true
+//     logAnalyticsWorkspaceId: !empty(platformSubscriptionId) ? monitoringResource.outputs.logAnalyticsWorkspaceId : ''
+//     vnetId: vnetIntegration ? vnet.outputs.vnetId : ''
+//     subnetId: vnetIntegration ? vnet.outputs.pepSubnetId : ''
+//   }
+// }
 
-module keyVaultSecrets './core/security/keyvault-secret.bicep' = {
-  dependsOn: [mongoCluster]
-  name: 'keyvault-secret-mongo-password'
-  scope: resourceGroup
-  params: {
-    name: 'mongoAdminPassword'
-    keyVaultName: keyVault.outputs.name
-    secretValue: mongoAdminPassword
-  }
-}
+// module keyVaultSecrets './core/security/keyvault-secret.bicep' = {
+//   dependsOn: [mongoCluster]
+//   name: 'keyvault-secret-mongo-password'
+//   scope: resourceGroup
+//   params: {
+//     name: 'mongoAdminPassword'
+//     keyVaultName: keyVault.outputs.name
+//     secretValue: mongoAdminPassword
+//   }
+// }
 
 module web 'core/host/appservice.bicep' = {
   name: 'appservice'
@@ -244,7 +244,8 @@ module web 'core/host/appservice.bicep' = {
       AZURE_OPENAI_GPT4_DEPLOYMENT_NAME: 'gpt-4o'
       AZURE_OPENAI_API_KEY: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=cognitiveServiceKey)'
       AZURE_COSMOS_PASSWORD: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=mongoAdminPassword)'
-      AZURE_COSMOS_CONNECTION_STRING: mongoCluster.outputs.connectionStringKey
+      // AZURE_COSMOS_CONNECTION_STRING: mongoCluster.outputs.connectionStringKey
+      AZURE_COSMOS_CONNECTION_STRING: 'connectionString'
       AZURE_COSMOS_USERNAME: mongoAdminUser
       AZURE_COSMOS_DATABASE_NAME: 'CosmicDB'
       AZURE_COSMOS_COLLECTION_NAME: 'CosmicFoodCollection'
@@ -262,31 +263,31 @@ module webKeyVaultAccess 'core/security/keyvault-access.bicep' = {
   }
 }
 
-module functions 'core/host/functions.bicep' = {
-  name: 'functions'
-  scope: resourceGroup
-  params: {
-    name: name
-    tags: tags
-    hostingPlanId: appServicePlan.outputs.id
-    applicationInsightsName: !empty(platformSubscriptionId) ? monitoringResource.outputs.applicationInsightsName : ''
-    mongoConnectionString: mongoCluster.outputs.connectionStringKey
-    azureCosmosPassword: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=mongoAdminPassword)'
-    azureCosmosUsername: mongoAdminUser
-    azureOpenAiApiKey: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=cognitiveServiceKey)'
-    azureOpenAiEndpoint: openAi.outputs.endpoint
-    azureOpenAiDeploymentName: openAIDeploymentName
-  }
-}
+// module functions 'core/host/functions.bicep' = {
+//   name: 'functions'
+//   scope: resourceGroup
+//   params: {
+//     name: name
+//     tags: tags
+//     hostingPlanId: appServicePlan.outputs.id
+//     applicationInsightsName: !empty(platformSubscriptionId) ? monitoringResource.outputs.applicationInsightsName : ''
+//     mongoConnectionString: 'string'
+//     azureCosmosPassword: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=mongoAdminPassword)'
+//     azureCosmosUsername: mongoAdminUser
+//     azureOpenAiApiKey: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=cognitiveServiceKey)'
+//     azureOpenAiEndpoint: openAi.outputs.endpoint
+//     azureOpenAiDeploymentName: openAIDeploymentName
+//   }
+// }
 
-module functionsKeyVaultAccess 'core/security/keyvault-access.bicep' = {
-  name: 'functions-keyvault-access'
-  scope: resourceGroup
-  params: {
-    keyVaultName: keyVault.outputs.name
-    principalId: functions.outputs.identityPrincipalId
-  }
-}
+// module functionsKeyVaultAccess 'core/security/keyvault-access.bicep' = {
+//   name: 'functions-keyvault-access'
+//   scope: resourceGroup
+//   params: {
+//     keyVaultName: keyVault.outputs.name
+//     principalId: functions.outputs.identityPrincipalId
+//   }
+// }
 
 output WEB_URI string = web.outputs.uri
 output AZURE_LOCATION string = location
