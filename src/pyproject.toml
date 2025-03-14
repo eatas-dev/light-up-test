@@ -9,7 +9,9 @@ dependencies = [
     "langchain",
     "langchain-openai",
     "langchain-community",
-    "pymongo"
+    "pymongo",
+    "youtube-transcript-api",
+    "pytube"
     ]
 
 [project.optional-dependencies]

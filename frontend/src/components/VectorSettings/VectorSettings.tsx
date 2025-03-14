@@ -13,13 +13,13 @@ interface Props {
 }
 
 export const VectorSettings = ({ updateRetrievalMode, defaultRetrievalMode }: Props) => {
-    const [retrievalMode, setRetrievalMode] = useState<RetrievalMode>(RetrievalMode.Hybrid);
+    const [retrievalMode, setRetrievalMode] = useState<RetrievalMode>(RetrievalMode.GPT4O);
     const retrievalModeId = useId("retrievalMode");
     const retrievalModeFieldId = useId("retrievalModeField");
 
     const onRetrievalModeChange = (_ev: React.FormEvent<HTMLDivElement>, option?: IDropdownOption<RetrievalMode> | undefined) => {
-        setRetrievalMode(option?.data || RetrievalMode.Hybrid);
-        updateRetrievalMode(option?.data || RetrievalMode.Hybrid);
+        setRetrievalMode(option?.data || RetrievalMode.GPT4O);
+        updateRetrievalMode(option?.data || RetrievalMode.GPT4O);
     };
 
     return (
@@ -29,9 +29,10 @@ export const VectorSettings = ({ updateRetrievalMode, defaultRetrievalMode }: Pr
                 label="検索モード"
                 selectedKey={defaultRetrievalMode.toString()}
                 options={[
-                    { key: "rag", text: "RAG with Vector Search", selected: retrievalMode == RetrievalMode.Hybrid, data: RetrievalMode.Hybrid },
-                    { key: "vector", text: "Vector Search", selected: retrievalMode == RetrievalMode.Vectors, data: RetrievalMode.Vectors },
-                    { key: "keyword", text: "Keyword Search", selected: retrievalMode == RetrievalMode.Text, data: RetrievalMode.Text }
+                    // { key: "rag", text: "RAG with Vector Search", selected: retrievalMode == RetrievalMode.Hybrid, data: RetrievalMode.Hybrid },
+                    // { key: "vector", text: "Vector Search", selected: retrievalMode == RetrievalMode.Vectors, data: RetrievalMode.Vectors },
+                    // { key: "keyword", text: "Keyword Search", selected: retrievalMode == RetrievalMode.Text, data: RetrievalMode.Text },
+                    { key: "gpt4o", text: "GPT-4oでの評価", selected: retrievalMode == RetrievalMode.GPT4O, data: RetrievalMode.GPT4O }
                 ]}
                 required
                 onChange={onRetrievalModeChange}
