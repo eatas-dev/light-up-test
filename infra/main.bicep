@@ -242,6 +242,7 @@ module web 'core/host/appservice.bicep' = {
       AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME: embeddingDeploymentName
       AZURE_OPENAI_GPT4_MODEL_NAME: 'gpt-4o'
       AZURE_OPENAI_GPT4_DEPLOYMENT_NAME: 'gpt-4o'
+      OPENAI_API_VERSION: '2023-09-15-preview'
       AZURE_OPENAI_API_KEY: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=cognitiveServiceKey)'
       AZURE_COSMOS_PASSWORD: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=mongoAdminPassword)'
       // AZURE_COSMOS_CONNECTION_STRING: mongoCluster.outputs.connectionStringKey
