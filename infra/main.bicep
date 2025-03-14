@@ -119,7 +119,7 @@ var openAiDeployments = [
       version: '2024-11-20'
     }
     sku: {
-      name: 'Standard'
+      name: 'GlobalStandard'
       capacity: 8
     }
   }
