@@ -30,13 +30,13 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install azd
-        uses: Azure/setup-azd@v2.0.0
+        uses: Azure/setup-azd@v2.2.0
 
       - name: Install Nodejs
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 18.x
 
